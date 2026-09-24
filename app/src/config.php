@@ -72,7 +72,35 @@ function init_db(): void
             ip TEXT NOT NULL,                                     -- IP de acesso
             UNIQUE(meeting_id, user_id)                           -- 1 registro por pessoa/reunião
         );
+
+        CREATE TABLE IF NOT EXISTS public_attendances (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            meeting_id INTEGER NOT NULL REFERENCES meetings(id),
+            name TEXT NOT NULL,                                   -- nome informado
+            cpf TEXT NOT NULL,                                    -- CPF informado
+            email TEXT NOT NULL,                                  -- e-mail informado
+            token TEXT NOT NULL UNIQUE,                           -- link p/ desfazer o registro
+            recorded_at TEXT NOT NULL DEFAULT (datetime('now')),  -- dia/hora do registro
+            ip TEXT NOT NULL                                      -- IP de acesso
+        );
     ");
+    migrate_db();
+}
+
+// Migrações simples (aplicação limitada: só ALTERs aditivos, tolerando "column already exists")
+function migrate_db(): void
+{
+    $pdo = db();
+    $migrations = [
+        "ALTER TABLE meetings ADD COLUMN public_token TEXT",
+    ];
+    foreach ($migrations as $sql) {
+        try { $pdo->exec($sql); } catch (PDOException $e) { /* coluna já existe */ }
+    }
+    try {
+        $pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS ux_pub_meeting_cpf ON public_attendances (meeting_id, cpf)');
+        $pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS ux_pub_meeting_email ON public_attendances (meeting_id, email)');
+    } catch (PDOException $e) { /* índice já existe */ }
 }
 
 init_db();
