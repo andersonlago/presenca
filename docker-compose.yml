@@ -1,0 +1,28 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      # URL usada nos links de confirmação enviados por e-mail
+      APP_URL: http://localhost:8080
+      # Fuso horário dos registros (UTC por padrão)
+      TZ: UTC
+      # SMTP usado para enviar o e-mail de confirmação (MailHog em dev)
+      SMTP_HOST: mailhog
+      SMTP_PORT: "1025"
+      MAIL_FROM: no-reply@presenca.local
+    volumes:
+      # Persiste o banco SQLite e as sessões entre restarts
+      - app_var:/var/www/html/var
+    depends_on:
+      - mailhog
+
+  # Interface web em http://localhost:8025 para ver os e-mails "enviados" (dev)
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "8025:8025"
+
+volumes:
+  app_var:
