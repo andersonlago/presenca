@@ -1,8 +1,10 @@
 <?php include __DIR__ . '/layout_top.php'; ?>
+<h1 class="page-title"><?= e($meeting['title']) ?></h1>
 <div class="card">
-  <h2><?= e($meeting['title']) ?></h2>
-  <p class="muted">Período para registrar presença:<br>
-    <?= e($meeting['starts_at']) ?> até <?= e($meeting['ends_at']) ?> (UTC)</p>
+  <div class="qr-meta" style="margin-top:0">
+    <div class="kv"><b>Início do registro</b><?= e($meeting['starts_at']) ?> (UTC)</div>
+    <div class="kv"><b>Fim do registro</b><?= e($meeting['ends_at']) ?> (UTC)</div>
+  </div>
 
   <?php if ($myAttendance): ?>
     <div class="flash ok">Presença registrada em <?= e($myAttendance['recorded_at']) ?> (UTC) a partir do IP <?= e($myAttendance['ip']) ?>.</div>
@@ -28,18 +30,20 @@
     registrada com dia/hora e IP. O código do QR muda a cada <?= (int)$qrMinutes ?> minuto(s)
     enquanto esta página ficar aberta — evite compartilhar foto/print do QR fora da reunião.
   </p>
-  <div id="qr-box" style="text-align:center"><?= $qrSvg /* SVG gerado localmente, sem HTML de usuário */ ?></div>
-  <p class="muted" style="text-align:center">
-    Link direto: <a href="<?= e($qrUrl) ?>"><?= e($qrUrl) ?></a><br>
-    Código atual do QR: <strong id="qr-code-label"><?= e($meeting['checkin_code']) ?></strong>
-    · próxima atualização em <span id="qr-countdown">—</span>
-  </p>
-  <div style="display:flex; gap:.6rem; flex-wrap:wrap">
-    <a class="btn" href="/meeting.php?id=<?= (int)$meeting['id'] ?>&qr=1" target="_blank">Baixar PNG do QR</a>
+  <div class="qr-flex">
+    <div id="qr-box"><?= $qrSvg /* SVG gerado localmente, sem HTML de usuário */ ?></div>
+    <div class="qr-meta" style="margin:0; grid-template-columns:1fr">
+      <div class="kv"><b>Link direto</b><a href="<?= e($qrUrl) ?>" style="word-break:break-all"><?= e($qrUrl) ?></a></div>
+      <div class="kv"><b>Código atual do QR</b><strong id="qr-code-label"><?= e($meeting['checkin_code']) ?></strong></div>
+      <div class="kv"><b>Próxima atualização</b><span id="qr-countdown">—</span></div>
+    </div>
+  </div>
+  <div class="form-actions">
+    <a class="btn btn-accent" href="/meeting.php?id=<?= (int)$meeting['id'] ?>&qr=1" target="_blank">Baixar PNG do QR</a>
     <form method="post" style="margin:0">
       <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
       <input type="hidden" name="action" value="regen_qr">
-      <button type="submit">Gerar novo código do QR agora</button>
+      <button type="submit" class="btn-outline" style="background:#fff">Gerar novo código do QR agora</button>
     </form>
   </div>
   <script>
@@ -247,19 +251,23 @@
 <?php endif; ?>
 
 <?php if ($isOwner): ?>
-  <h2>Lista de presenças</h2>
+  <h2 class="page-title" style="font-size:1.25rem">Lista de presenças</h2>
   <?php if (!$attendees && !$publicAttendees): ?>
-    <p class="muted">Nenhum registro ainda.</p>
+    <div class="card"><p class="muted" style="margin:0">Nenhum registro ainda.</p></div>
   <?php else: ?>
+    <div class="table-wrap">
     <table>
-      <tr><th>Nome / E-mail</th><th>Dia/Hora do registro (UTC)</th><th>IP</th></tr>
+      <thead><tr><th>Nome / E-mail</th><th>Dia/Hora do registro (UTC)</th><th>IP</th></tr></thead>
+      <tbody>
       <?php foreach ($attendees as $a): ?>
-        <tr><td><?= e($a['email']) ?> <span class="muted">(conta)</span></td><td><?= e($a['recorded_at']) ?></td><td><?= e($a['ip']) ?></td></tr>
+        <tr><td><?= e($a['email']) ?> <span class="badge">conta</span></td><td><?= e($a['recorded_at']) ?></td><td><?= e($a['ip']) ?></td></tr>
       <?php endforeach; ?>
       <?php foreach ($publicAttendees as $a): ?>
-        <tr><td><?= e($a['name']) ?> · <?= e($a['email']) ?> · CPF <?= e($a['cpf']) ?> <span class="muted">(QR)</span></td><td><?= e($a['recorded_at']) ?></td><td><?= e($a['ip']) ?></td></tr>
+        <tr><td><?= e($a['name']) ?> · <?= e($a['email']) ?> · CPF <?= e($a['cpf']) ?> <span class="badge">QR</span></td><td><?= e($a['recorded_at']) ?></td><td><?= e($a['ip']) ?></td></tr>
       <?php endforeach; ?>
+      </tbody>
     </table>
+    </div>
   <?php endif; ?>
 <?php endif; ?>
 <?php include __DIR__ . '/layout_bottom.php'; ?>

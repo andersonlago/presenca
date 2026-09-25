@@ -1,42 +1,46 @@
-<?php /* layout simples usado pelos templates via render() */ ?>
+<?php /* layout gov.br usado pelos templates via render() */ ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= e($title ?? APP_NAME) ?> — <?= e(APP_NAME) ?></title>
-<style>
-  body { font-family: system-ui, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; color:#222; }
-  h1 { font-size: 1.4rem; }
-  nav a { margin-right: 1rem; }
-  .card { border:1px solid #ddd; border-radius:8px; padding:1rem; margin:1rem 0; }
-  input, button { font: inherit; padding:.4rem .6rem; margin:.2rem 0; }
-  button, .btn { background:#2563eb; color:#fff; border:0; border-radius:6px; cursor:pointer; text-decoration:none; display:inline-block; }
-  .flash { padding:.6rem 1rem; border-radius:6px; margin:1rem 0; }
-  .flash.ok { background:#dcfce7; } .flash.err { background:#fee2e2; }
-  table { border-collapse: collapse; width: 100%; }
-  th, td { border:1px solid #ddd; padding:.4rem .6rem; text-align:left; font-size:.95rem; }
-  .muted { color:#666; font-size:.85rem; }
-  .badge { font-size:.75rem; padding:.1rem .5rem; border-radius:99px; background:#e5e7eb; }
-  .badge.open { background:#dcfce7; } .badge.closed { background:#fee2e2; }
-</style>
+<link rel="stylesheet" href="/assets/govbr.css">
 </head>
 <body>
-<header>
-  <h1><?= e(APP_NAME) ?></h1>
-  <nav>
-    <?php if (!empty($user)): ?>
-      <a href="/index.php">Minhas reuniões</a>
-      <a href="/meetings.php">Registrar presença</a>
-      <span class="muted">(<?= e($user['email']) ?>)</span>
-      <a href="/logout.php">Sair</a>
-    <?php else: ?>
-      <a href="/login.php">Entrar</a>
-      <a href="/register.php">Criar conta</a>
-    <?php endif; ?>
-  </nav>
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+<header class="govbr-header">
+  <div class="header-bar">
+    <a class="govbr-brand" href="<?= !empty($user) ? '/index.php' : '/' ?>">
+      <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true" focusable="false">
+        <rect x="2" y="2" width="14" height="14" rx="2" fill="#FF7B00"/>
+        <rect x="20" y="2" width="14" height="14" rx="2" fill="#FFFFFF" opacity=".9"/>
+        <rect x="2" y="20" width="14" height="14" rx="2" fill="#FFFFFF" opacity=".9"/>
+        <rect x="20" y="20" width="14" height="14" rx="2" fill="#23BA51"/>
+      </svg>
+      <span class="brand-text">
+        <span class="brand-gov">Governo Federal</span>
+        <span class="brand-app"><?= e(APP_NAME) ?></span>
+      </span>
+    </a>
+    <nav class="govbr-nav" aria-label="Navegação principal">
+      <?php if (!empty($user)): ?>
+        <a href="/index.php"<?= ($active ?? '') === 'dashboard' ? ' class="active"' : '' ?>>Minhas reuniões</a>
+        <a href="/meetings.php"<?= ($active ?? '') === 'meetings' ? ' class="active"' : '' ?>>Registrar presença</a>
+        <span class="user-chip"><?= e($user['email']) ?></span>
+        <a href="/logout.php">Sair</a>
+      <?php else: ?>
+        <a href="/login.php"<?= ($active ?? '') === 'login' ? ' class="active"' : '' ?>>Entrar</a>
+        <a href="/register.php"<?= ($active ?? '') === 'register' ? ' class="active"' : '' ?>>Criar conta</a>
+      <?php endif; ?>
+    </nav>
+  </div>
 </header>
+<div class="govbr-breadcrumb" aria-label="Você está em">
+  <span><a href="/">Início</a></span>
+  <span><?= e($title ?? APP_NAME) ?></span>
+</div>
+<main id="conteudo">
 <?php if ($f = flash()): ?>
-  <div class="flash <?= e($f['type']) ?>"><?= e($f['msg']) ?></div>
+  <div class="flash <?= e($f['type']) ?>" role="alert"><?= e($f['msg']) ?></div>
 <?php endif; ?>
-<main>
