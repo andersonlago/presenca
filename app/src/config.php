@@ -93,10 +93,19 @@ function migrate_db(): void
     $pdo = db();
     $migrations = [
         "ALTER TABLE meetings ADD COLUMN public_token TEXT",
+        "ALTER TABLE meetings ADD COLUMN checkin_code TEXT",
     ];
     foreach ($migrations as $sql) {
         try { $pdo->exec($sql); } catch (PDOException $e) { /* coluna já existe */ }
     }
+    // Preenche o código dinâmico do QR das reuniões existentes/sem código.
+    try {
+        $missing = db()->query('SELECT id FROM meetings WHERE checkin_code IS NULL')->fetchAll(PDO::FETCH_COLUMN);
+        $upd = db()->prepare('UPDATE meetings SET checkin_code = ? WHERE id = ?');
+        foreach ($missing as $mid) {
+            $upd->execute([(string)floor(time() / 300), (int)$mid]);
+        }
+    } catch (PDOException $e) { /* tabela ainda não criada */ }
     try {
         $pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS ux_pub_meeting_cpf ON public_attendances (meeting_id, cpf)');
         $pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS ux_pub_meeting_email ON public_attendances (meeting_id, email)');
