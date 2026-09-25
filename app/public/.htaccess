@@ -1,0 +1,7 @@
+Options -Indexes
+DirectoryIndex index.php login.php
+
+# Bloqueia acesso direto a código/banco fora de public/
+<FilesMatch "\.(sqlite|db|md)$">
+  Require all denied
+</FilesMatch>
