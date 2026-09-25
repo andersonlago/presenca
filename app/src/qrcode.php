@@ -43,13 +43,14 @@ function qr_gf(): array
 {
     static $t = null;
     if ($t === null) {
-        $exp = array_fill(0, 512, 0); $log = array_fill(0, 256, 0);
+        // tabela exp precisa de folga: log[a]+log[b] pode chegar a 506 (253+253)
+        $exp = array_fill(0, 1024, 0); $log = array_fill(0, 256, 0);
         $x = 1;
         for ($i = 0; $i < 255; $i++) {
             $exp[$i] = $x; $log[$x] = $i;
             $x <<= 1; if ($x & 0x100) $x ^= 0x11d;
         }
-        for ($i = 255; $i < 512; $i++) $exp[$i] = $exp[$i - 255];
+        for ($i = 255; $i < 1024; $i++) $exp[$i] = $exp[$i - 255];
         $t = [$exp, $log];
     }
     return $t;
@@ -76,7 +77,9 @@ function qr_generator_poly(int $degree): array
     if (isset($cache[$degree])) return $cache[$degree];
     $g = [1];
     for ($i = 0; $i < $degree; $i++) {
-        $g = qr_poly_mul($g, [1, (1 << $i)]);
+        // fator (x - alpha^i) = [1, exp[i]] — usa a tabela GF, nao 1<<i (estoura >=7!)
+        [$exp, ] = qr_gf();
+        $g = qr_poly_mul($g, [1, $exp[$i]]);
     }
     return $cache[$degree] = $g;
 }
