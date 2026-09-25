@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 /**
  * Gerador mínimo de QR Code em PHP puro (sem dependências externas).
- * - Modo byte (UTF-8), nível ECC L, versões 1..4 (até 78 bytes).
+ * - Modo byte (UTF-8), nível ECC L, versões 1..10 (até 271 bytes).
  * - Seleção automática de máscara (0..7) com a regra padrão de penalidade.
  * - Renderização em SVG para exibir na tela / compartilhar / imprimir.
  * Especificação: ISO/IEC 18004. Matriz validada bit a bit contra a
@@ -11,23 +11,31 @@ declare(strict_types=1);
  */
 
 // versão => [total codewords, ec codewords por bloco, qtd blocos, data codewords]
+// (tabela ISO/IEC 18004, nível L, versões 1..10 — cobre URLs de até 271 bytes)
 const QR_BLOCKS = [
     1 => [26, 7, 1, 19],
     2 => [44, 10, 1, 34],
     3 => [70, 15, 1, 55],
     4 => [100, 20, 1, 80],
+    5 => [134, 26, 1, 108],
+    6 => [172, 18, 2, 136],
+    7 => [196, 20, 2, 156],
+    8 => [242, 24, 2, 194],
+    9 => [292, 30, 2, 232],
+    10 => [346, 18, 2, 280],
 ];
 // capacidade em bytes no modo byte, nível L
-const QR_BYTE_CAP = [1 => 17, 2 => 32, 3 => 53, 4 => 78];
+const QR_BYTE_CAP = [1 => 17, 2 => 32, 3 => 53, 4 => 78, 5 => 106, 6 => 134, 7 => 154, 8 => 192, 9 => 230, 10 => 271];
 // posições dos alignment patterns por versão (a interseção com o timing é ignorada)
-const QR_ALIGN = [1 => [], 2 => [6, 18], 3 => [6, 22], 4 => [6, 26]];
+const QR_ALIGN = [1 => [], 2 => [6, 18], 3 => [6, 22], 4 => [6, 26], 5 => [6, 30],
+    6 => [6, 34], 7 => [6, 22, 38], 8 => [6, 24, 42], 9 => [6, 26, 46], 10 => [6, 28, 50]];
 
 function qr_version_for_len(int $n): int
 {
     foreach (QR_BYTE_CAP as $v => $cap) {
         if ($n <= $cap) return $v;
     }
-    throw new RuntimeException('Texto excede 78 bytes (limite do QR embutido).');
+    throw new RuntimeException('Texto excede ' . max(QR_BYTE_CAP) . ' bytes (limite do QR embutido).');
 }
 
 // ---- GF(256), polinômio 0x11d ----
@@ -118,11 +126,19 @@ function qr_data_codewords(string $text, int $version): array
     $pad = [0xEC, 0x11]; $k = 0;
     while (count($cw) < $dataCount) { $cw[] = $pad[$k % 2]; $k++; }
 
-    // split em blocos + EC (versões 1..4 nível L têm um único bloco)
-    $all = [];
-    foreach (array_chunk($cw, intdiv($dataCount, $numBlocks)) as $block) {
-        $all = array_merge($all, $block, qr_ec_bytes($block, $ecPerBlock));
+    // split em blocos + EC. Para as versões suportadas (1..10, nível L) são
+    // 1 bloco ou 2 blocos de mesmo tamanho (short == long == dataCount / 2).
+    if ($numBlocks === 1) {
+        $blocks = [$cw];
+    } else {
+        $longLen = $dataCount - intdiv($dataCount, 2);
+        $blocks = [array_slice($cw, 0, $longLen), array_slice($cw, $longLen)];
     }
+    $ecs = array_map(fn($b) => qr_ec_bytes($b, $ecPerBlock), $blocks);
+    $all = [];
+    $maxData = max(array_map('count', $blocks));
+    for ($i = 0; $i < $maxData; $i++) foreach ($blocks as $b) if (isset($b[$i])) $all[] = $b[$i];
+    for ($i = 0; $i < $ecPerBlock; $i++) foreach ($ecs as $e) $all[] = $e[$i];
     return $all;
 }
 
@@ -291,6 +307,39 @@ function qr_encode_matrix(string $text): array
         if ($p < $bestPen) { $bestPen = $p; $best = $m; }
     }
     return $best;
+}
+
+/** PNG binário do QR (sem dependências: usa zlib). $modulePx = pixels por módulo. */
+function qr_to_png(string $text, int $modulePx = 8): string
+{
+    $m = qr_encode_matrix($text);
+    $size = count($m);
+    $quiet = 4;
+    $dim = ($size + 2 * $quiet) * $modulePx;
+
+    // scanlines: 1 byte de filtro (0) + RGB por pixel (tudo preto ou branco)
+    $rows = '';
+    for ($y = 0; $y < $dim; $y++) {
+        $row = "\x00";
+        $r = intdiv($y, $modulePx) - $quiet;
+        for ($x = 0; $x < $dim; $x += $modulePx) {
+            $c = intdiv($x, $modulePx) - $quiet;
+            $dark = $r >= 0 && $r < $size && $c >= 0 && $c < $size && $m[$r][$c];
+            $px = $dark ? "\x00\x00\x00" : "\xff\xff\xff";
+            $row .= str_repeat($px, $modulePx);
+        }
+        $rows .= $row;
+    }
+
+    $chunk = function (string $type, string $data): string {
+        return pack('N', strlen($data)) . $type . $data
+             . pack('N', crc32($type . $data));
+    };
+
+    return "\x89PNG\r\n\x1a\n"
+         . $chunk('IHDR', pack('N*N*C5', $dim, $dim, 8, 2, 0, 0, 0))
+         . $chunk('IDAT', gzcompress($rows, 9))
+         . $chunk('IEND', '');
 }
 
 function qr_to_svg(string $text, int $modulePx = 6): string

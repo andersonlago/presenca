@@ -17,9 +17,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($eTs <= $sTs) {
         flash('O fim do período deve ser depois do início.', 'err');
     } else {
-        db()->prepare('INSERT INTO meetings (user_id, title, starts_at, ends_at) VALUES (?,?,?,?)')
-            ->execute([$user['id'], $title, date('Y-m-d H:i:s', $sTs), date('Y-m-d H:i:s', $eTs)]);
-        flash('Reunião criada.');
+        // public_token: identifica a reunião no link/QR público de presença.
+        // checkin_code: código dinâmico embutido no QR (muda a cada regeneração).
+        $publicToken = bin2hex(random_bytes(16));
+        $checkinCode = strtoupper(bin2hex(random_bytes(3)));
+        db()->prepare('INSERT INTO meetings (user_id, title, starts_at, ends_at, public_token, checkin_code) VALUES (?,?,?,?,?,?)')
+            ->execute([$user['id'], $title, date('Y-m-d H:i:s', $sTs), date('Y-m-d H:i:s', $eTs), $publicToken, $checkinCode]);
+        flash('Reunião criada. O QR Code de presença está na página da reunião.');
     }
     header('Location: /index.php');
     exit;
