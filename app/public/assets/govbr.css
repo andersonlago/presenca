@@ -1,0 +1,283 @@
+/* ============================================================
+   Tema baseado no Design System de Identidade Digital do
+   Governo Federal Brasileiro (gov.br)
+   Tokens oficiais: azul #001D3D, primária de interação #1351B6,
+   acento laranja #FF7B00, verde #23BA51, vermelho #C43129.
+   ============================================================ */
+:root {
+  /* Cores institucionais (DS gov.br) */
+  --ds-primary: #001D3D;          /* Azul marinho profundo 900 */
+  --ds-primary-800: #002E5D;
+  --ds-primary-700: #003E80;      /* links / hover escuro */
+  --ds-primary-300: #1351B6;      /* azul principal de interação */
+  --ds-secondary: #FF7B00;        /* Laranja 600 — destaque/acento */
+  --ds-success: #23BA51;          /* Verde C600 */
+  --ds-success-dark: #137733;
+  --ds-warning: #FFC733;          /* Amarelo C500 */
+  --ds-danger: #C43129;           /* Vermelho 800 */
+
+  /* Neutros */
+  --ds-gray-900: #1b1c1d;
+  --ds-gray-700: #525456;
+  --ds-gray-500: #8F8F8F;
+  --ds-gray-300: #D8D9DA;
+  --ds-gray-100: #F4F4F4;         /* fundo geral (fundo-neutro) */
+  --ds-white: #FFFFFF;
+
+  /* Tipografia — "Rawline" é a fonte oficial; fallback system-ui */
+  --ds-font: 'Rawline', 'Noto Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+
+  /* Raios e sombras */
+  --ds-radius: 4px;
+  --ds-shadow: 0 4px 8px rgba(0, 29, 61, .12);
+  --ds-shadow-lg: 0 6px 18px rgba(0, 29, 61, .18);
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: var(--ds-font);
+  background: var(--ds-gray-100);
+  color: var(--ds-gray-900);
+  font-size: 1rem;
+  line-height: 1.5;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+a { color: var(--ds-primary-300); text-decoration: none; }
+a:hover { color: var(--ds-primary-700); text-decoration: underline; }
+a:focus-visible, button:focus-visible, input:focus-visible {
+  outline: 2px solid var(--ds-secondary);
+  outline-offset: 2px;
+}
+
+/* ---------- Skip link (acessibilidade DS) ---------- */
+.skip-link {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--ds-primary); color: #fff; padding: .5rem 1rem; z-index: 100;
+}
+.skip-link:focus { left: 0; }
+
+/* ---------- Header institucional ---------- */
+.govbr-header {
+  background: linear-gradient(180deg, var(--ds-primary) 0%, var(--ds-primary-800) 100%);
+  color: var(--ds-white);
+  box-shadow: var(--ds-shadow);
+}
+.govbr-header .header-bar {
+  max-width: 1120px; margin: 0 auto; padding: 0 1rem;
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  min-height: 72px;
+}
+.govbr-brand { display: flex; align-items: center; gap: .75rem; color: #fff; }
+.govbr-brand:hover { text-decoration: none; color: #fff; }
+.govbr-brand svg { display: block; }
+.govbr-brand .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+.govbr-brand .brand-gov { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.85); }
+.govbr-brand .brand-app { font-size: 1.15rem; font-weight: 700; }
+
+.govbr-nav { margin-left: auto; display: flex; align-items: center; gap: .25rem; flex-wrap: wrap; }
+.govbr-nav a {
+  color: #fff; padding: .5rem .9rem; border-radius: var(--ds-radius);
+  font-size: .95rem; font-weight: 600;
+}
+.govbr-nav a:hover { background: rgba(255,255,255,.12); text-decoration: none; }
+.govbr-nav a.active { background: var(--ds-secondary); color: var(--ds-primary); }
+.govbr-nav .user-chip {
+  color: rgba(255,255,255,.85); font-size: .85rem; padding: 0 .5rem;
+}
+
+/* faixa laranja decorativa sob o header */
+.govbr-header::after {
+  content: ""; display: block; height: 4px;
+  background: linear-gradient(90deg, var(--ds-secondary) 0%, #FFA800 100%);
+}
+
+/* breadcrumb */
+.govbr-breadcrumb {
+  max-width: 1120px; margin: 0 auto; padding: .5rem 1rem 0;
+  font-size: .82rem; color: var(--ds-gray-700);
+}
+.govbr-breadcrumb a { color: var(--ds-primary-300); }
+.govbr-breadcrumb span + span::before { content: "›"; margin: 0 .4rem; color: var(--ds-gray-500); }
+
+/* ---------- Layout principal ---------- */
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+.page-title {
+  color: var(--ds-primary);
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: .5rem 0 1.25rem;
+  display: flex; align-items: center; gap: .6rem;
+}
+.page-title::before {
+  content: ""; width: 6px; height: 1.6em; border-radius: 3px;
+  background: var(--ds-secondary); display: inline-block;
+}
+h2 { color: var(--ds-primary); font-size: 1.2rem; font-weight: 700; margin: 0 0 1rem; }
+h3 { color: var(--ds-primary-800); font-size: 1rem; }
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--ds-white);
+  border: 1px solid var(--ds-gray-300);
+  border-left: 4px solid var(--ds-primary-300);
+  border-radius: var(--ds-radius);
+  padding: 1.5rem;
+  margin: 0 0 1.25rem;
+  box-shadow: var(--ds-shadow);
+}
+.card.accent { border-left-color: var(--ds-secondary); }
+.card h2 { margin-top: 0; }
+
+/* ---------- Botões (DS: primário / secundário / alerta) ---------- */
+button, .btn {
+  font-family: var(--ds-font);
+  font-size: .95rem; font-weight: 600;
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .65rem 1.5rem;
+  border-radius: 999px;                 /* botões arredondados do DS */
+  border: 2px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .15s ease, color .15s ease, box-shadow .15s ease;
+}
+.btn-primary, button[type="submit"], .btn:not(.btn-outline):not(.btn-danger):not(.btn-accent) {
+  background: var(--ds-primary-300);
+  color: #fff;
+}
+.btn-primary:hover, button[type="submit"]:hover, .btn:not(.btn-outline):not(.btn-danger):not(.btn-accent):hover {
+  background: var(--ds-primary-700);
+  color: #fff; text-decoration: none; box-shadow: var(--ds-shadow);
+}
+.btn-accent { background: var(--ds-secondary); color: var(--ds-primary) !important; }
+.btn-accent:hover { background: #E56E00; box-shadow: var(--ds-shadow); }
+.btn-outline {
+  background: transparent; color: var(--ds-primary-300);
+  border-color: var(--ds-primary-300);
+}
+.btn-outline:hover { background: rgba(19, 81, 182, .08); text-decoration: none; }
+.btn-danger { background: var(--ds-danger); color: #fff; }
+.btn-danger:hover { background: #9E2721; text-decoration: none; }
+.btn-sm { padding: .4rem 1rem; font-size: .85rem; }
+
+/* ---------- Formulários ---------- */
+label { display: block; font-weight: 600; color: var(--ds-primary-800); font-size: .9rem; margin-bottom: .25rem; }
+input, select, textarea {
+  font-family: var(--ds-font);
+  font-size: 1rem;
+  width: 100%;
+  padding: .6rem .8rem;
+  border: 1px solid var(--ds-gray-500);
+  border-radius: var(--ds-radius);
+  background: #fff;
+  color: var(--ds-gray-900);
+  margin: 0 0 1rem;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--ds-primary-300);
+  box-shadow: 0 0 0 3px rgba(19, 81, 182, .25);
+}
+.form-field { margin-bottom: .25rem; }
+.form-actions { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; margin-top: .5rem; }
+.form-hint { font-size: .82rem; color: var(--ds-gray-700); margin: -.5rem 0 1rem; }
+
+/* ---------- Alertas / flash ---------- */
+.flash {
+  border-radius: var(--ds-radius);
+  padding: .9rem 1.2rem;
+  margin: 0 0 1.25rem;
+  font-size: .95rem;
+  border: 1px solid transparent;
+  border-left-width: 6px;
+  display: flex; gap: .6rem; align-items: flex-start;
+}
+.flash.ok {
+  background: #E6F6EC; border-left-color: var(--ds-success);
+  color: var(--ds-success-dark);
+}
+.flash.err {
+  background: #FBE9E7; border-left-color: var(--ds-danger);
+  color: var(--ds-danger);
+}
+.flash.info {
+  background: #E8F0FB; border-left-color: var(--ds-primary-300);
+  color: var(--ds-primary-700);
+}
+
+/* ---------- Tabelas ---------- */
+table { border-collapse: collapse; width: 100%; background: #fff; border-radius: var(--ds-radius); overflow: hidden; box-shadow: var(--ds-shadow); }
+th {
+  background: var(--ds-primary); color: #fff;
+  text-align: left; font-size: .82rem; text-transform: uppercase; letter-spacing: .04em;
+  padding: .7rem .9rem;
+}
+td { padding: .65rem .9rem; border-bottom: 1px solid var(--ds-gray-300); font-size: .95rem; }
+tbody tr:nth-child(even) td { background: #FAFAFA; }
+tbody tr:hover td { background: #EFF5FD; }
+.table-wrap { overflow-x: auto; border-radius: var(--ds-radius); }
+
+/* ---------- Badges / status ---------- */
+.badge {
+  display: inline-flex; align-items: center; gap: .35rem;
+  font-size: .75rem; font-weight: 700; letter-spacing: .03em;
+  padding: .2rem .7rem; border-radius: 999px;
+  background: var(--ds-gray-300); color: var(--ds-gray-700);
+  vertical-align: middle;
+}
+.badge::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.badge.open { background: #E6F6EC; color: var(--ds-success-dark); }
+.badge.closed { background: #FBE9E7; color: var(--ds-danger); }
+
+.muted { color: var(--ds-gray-700); font-size: .88rem; }
+
+/* ---------- QR card ---------- */
+#qr-card { border-left-color: var(--ds-secondary); }
+.qr-flex { display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: flex-start; }
+#qr-box {
+  display: inline-block; padding: 1rem; background: #fff;
+  border: 1px solid var(--ds-gray-300); border-radius: var(--ds-radius);
+  box-shadow: var(--ds-shadow);
+}
+#qr-box svg { display: block; }
+.qr-meta {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: .75rem; margin: 1rem 0; flex: 1; min-width: 240px;
+}
+.qr-meta .kv {
+  background: var(--ds-gray-100); border-radius: var(--ds-radius);
+  padding: .6rem .8rem; font-size: .9rem; color: var(--ds-gray-900);
+}
+.qr-meta .kv b { display: block; color: var(--ds-primary); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .15rem; }
+
+/* ---------- Footer institucional ---------- */
+footer.govbr-footer {
+  background: var(--ds-primary);
+  color: rgba(255, 255, 255, .85);
+  margin-top: auto;
+}
+footer.govbr-footer .footer-bar {
+  max-width: 1120px; margin: 0 auto; padding: 1.25rem 1rem;
+  display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  font-size: .85rem;
+}
+footer.govbr-footer a { color: #fff; }
+.govbr-footer .footer-std { margin-left: auto; opacity: .8; }
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 640px) {
+  .govbr-header .header-bar { padding-top: .75rem; padding-bottom: .75rem; }
+  .govbr-nav { margin-left: 0; width: 100%; }
+  .page-title { font-size: 1.3rem; }
+}

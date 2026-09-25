@@ -337,7 +337,7 @@ function qr_to_png(string $text, int $modulePx = 8): string
     };
 
     return "\x89PNG\r\n\x1a\n"
-         . $chunk('IHDR', pack('N*N*C5', $dim, $dim, 8, 2, 0, 0, 0))
+         . $chunk('IHDR', pack('NNCCCCC', $dim, $dim, 8, 2, 0, 0, 0))
          . $chunk('IDAT', gzcompress($rows, 9))
          . $chunk('IEND', '');
 }
